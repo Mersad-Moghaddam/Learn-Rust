@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+{% block content %}
+<h1>ورود</h1>
+<form method="post" action="{% url 'account_login' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  {{ redirect_field }}
+  <button type="submit">ورود</button>
+</form>
+<p><a href="{% url 'account_signup' %}">ثبت‌نام</a> | <a href="{% url 'account_reset_password' %}">بازیابی گذرواژه</a></p>
+{% get_providers as providers %}
+{% for provider in providers %}{% if provider.id == 'google' %}
+<form method="post" action="{% provider_login_url provider %}">
+  {% csrf_token %}
+  <button type="submit">ورود با گوگل</button>
+</form>
+{% endif %}{% endfor %}
+{% endblock %}

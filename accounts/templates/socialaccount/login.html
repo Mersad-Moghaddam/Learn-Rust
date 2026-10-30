@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>ورود با گوگل</h1>
+<p>برای ادامه به گوگل هدایت می‌شوید.</p>
+<form method="post">{% csrf_token %}<button type="submit">ادامه</button></form>
+{% endblock %}

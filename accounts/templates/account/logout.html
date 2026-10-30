@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>خروج</h1>
+<form method="post">{% csrf_token %}{{ redirect_field }}<button type="submit">خروج</button></form>
+{% endblock %}

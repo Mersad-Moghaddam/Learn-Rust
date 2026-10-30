@@ -1,0 +1,34 @@
+{% load static %}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}یادگیری Rust{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'site.css' %}">
+  <script src="{% static 'site.js' %}" defer></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+  <header class="site-header">
+    <div class="header-inner">
+      {% url 'learning:index' as learning_index %}
+      {% if learning_index %}<a class="brand" href="{{ learning_index }}">{% else %}<span class="brand">{% endif %}<span class="brand-mark" aria-hidden="true">{ }</span><span>یادگیری <bdi>Rust</bdi></span>{% if learning_index %}</a>{% else %}</span>{% endif %}
+      <nav aria-label="ناوبری اصلی">
+        {% if learning_index %}<a href="{{ learning_index }}">دوره‌ها</a>{% endif %}
+        {% url 'account_login' as login_url %}
+        {% url 'account_logout' as logout_url %}
+        {% if user.is_authenticated and logout_url %}<a href="{{ logout_url }}">خروج</a>{% elif login_url %}<a href="{{ login_url }}">ورود</a>{% endif %}
+        <button class="theme-toggle" type="button" hidden aria-label="تغییر پوسته" aria-pressed="false">پوسته تیره</button>
+      </nav>
+    </div>
+  </header>
+  <main id="main" tabindex="-1">
+    {% if messages %}<div class="messages" aria-label="پیام‌ها">{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer"><span>یادگیری گام‌به‌گام <bdi>Rust</bdi></span><span>برای یاد گرفتن، دست به کد شوید.</span></footer>
+</body>
+</html>

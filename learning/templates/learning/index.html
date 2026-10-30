@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>دوره‌های آموزشی</h1>
+{% url 'progress:list' as progress_url %}
+{% if user.is_authenticated and progress_url %}<p><a href="{{ progress_url }}">پیشرفت من</a></p>{% endif %}
+{% for course in courses %}
+  <section><h2>{{ course.title }}</h2>
+  {% for chapter in course.chapters.all %}
+    <h3>{{ chapter.title }}</h3><ul>
+    {% for lesson in chapter.lessons.all %}
+      <li><a href="{% url 'learning:lesson' course.slug chapter.slug lesson.slug %}">{{ lesson.title }}</a></li>
+    {% endfor %}
+    </ul>
+    {% if chapter.quiz.published %}<a href="{% url 'learning:quiz' course.slug chapter.slug %}">آزمون {{ chapter.title }}</a>{% endif %}
+  {% endfor %}</section>
+{% empty %}<p>هنوز دوره‌ای منتشر نشده است.</p>{% endfor %}
+{% endblock %}

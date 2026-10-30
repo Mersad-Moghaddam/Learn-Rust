@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>تأیید ایمیل</h1>
+{% if confirmation %}
+{% if can_confirm %}
+<p>برای تأیید نشانی {{ confirmation.email_address.email }} دکمه زیر را بزنید.</p>
+<form method="post">{% csrf_token %}{{ redirect_field }}<button type="submit">تأیید ایمیل</button></form>
+{% else %}<p>این نشانی قبلاً برای حساب دیگری تأیید شده است.</p>{% endif %}
+{% else %}<p>پیوند تأیید نامعتبر یا منقضی است.</p>{% endif %}
+{% endblock %}

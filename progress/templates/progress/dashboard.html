@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+  <h1>پیشرفت من</h1>
+  <h2>درس‌های تکمیل‌شده</h2>
+  <ul>
+    {% for item in lessons %}
+      <li>{{ item.lesson.chapter.course.title }} / {{ item.lesson.chapter.title }} / {{ item.lesson.title }}</li>
+    {% empty %}
+      <li>هنوز درسی را تکمیل نکرده‌اید.</li>
+    {% endfor %}
+  </ul>
+  <h2>نتایج آزمون‌ها</h2>
+  <ul>
+    {% for attempt in attempts %}
+      <li>{{ attempt.snapshot.quiz_title }}: {{ attempt.snapshot.score }} از {{ attempt.snapshot.total }} — {{ attempt.created_at }}
+        <ul>
+          {% for answer in attempt.snapshot.answers %}
+            <li>{{ answer.prompt }} — پاسخ شما: {{ answer.choice_text }} — پاسخ درست: {{ answer.correct_choice_text }}{% if answer.explanation %} — {{ answer.explanation }}{% endif %}</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% empty %}
+      <li>هنوز در آزمونی شرکت نکرده‌اید.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

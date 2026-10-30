@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<article>
+<h1>{{ lesson.title }}</h1>
+<div>{{ lesson.body|linebreaks }}</div>
+{% if lesson.code %}<pre dir="ltr"><code>{{ lesson.code }}</code></pre>{% endif %}
+{% for exercise in lesson.exercises.all %}
+<section><h2>{{ exercise.title }}</h2>{{ exercise.instructions|linebreaks }}
+<form class="editor">
+<label for="exercise-editor-{{ exercise.pk }}">پاسخ تمرین</label>
+<textarea id="exercise-editor-{{ exercise.pk }}" class="editor-input" dir="ltr" spellcheck="false">{{ exercise.starter_code }}</textarea>
+<div class="editor-actions"><button type="reset">بازگردانی پاسخ اولیه</button></div>
+</form>
+<p class="editor-note">پاسخ شما ذخیره، اجرا یا بررسی خودکار نمی‌شود. بازگردانی، نوشتهٔ فعلی را پاک می‌کند.</p>
+<details><summary>گام اول: مرور مسئله</summary>
+<p>خواستهٔ تمرین و مثال درس را مرور کنید. پیش از دیدن راهنمایی، پاسخ خود را بنویسید.</p>
+{% if exercise.hint %}<details><summary>گام دوم: راهنمایی تمرین</summary>{{ exercise.hint|linebreaks }}</details>{% endif %}
+</details>
+{% if exercise.answer %}<details><summary>پاسخ نمونه و خودارزیابی</summary>
+<p>پاسخ خود را با نمونه مقایسه کنید: آیا همهٔ خواسته‌های تمرین را برآورده می‌کند؟ تفاوت‌ها را بررسی کنید؛ پاسخ‌های دیگری هم ممکن است درست باشند. این مقایسه درستی یا قابلیت کامپایل را تضمین نمی‌کند.</p>
+<pre dir="ltr"><code>{{ exercise.answer }}</code></pre></details>{% endif %}
+<p>برای اجرای کد، در صورت تمایل آن را به <a href="https://play.rust-lang.org/" target="_blank" rel="noopener noreferrer">Rust Playground (پنجره جدید)</a> منتقل کنید. کد به سرویس ثالث ارسال می‌شود؛ قطعه‌کدها ممکن است برای اجرا به برنامهٔ کامل نیاز داشته باشند.</p>
+</section>
+{% endfor %}
+</article>
+{% url 'progress:complete' lesson.chapter.course.slug lesson.chapter.slug lesson.slug as complete_url %}
+{% url 'progress:list' as progress_url %}
+{% url 'account_login' as login_url %}
+{% if user.is_authenticated %}
+{% if complete_url %}<form method="post" action="{{ complete_url }}">{% csrf_token %}<button type="submit">درس را تکمیل کردم</button></form>{% endif %}
+{% if progress_url %}<a href="{{ progress_url }}">پیشرفت من</a>{% endif %}
+{% elif login_url %}
+<p><a href="{{ login_url }}?next={{ request.get_full_path|urlencode }}">برای ثبت پیشرفت وارد شوید</a></p>
+{% endif %}
+{% endblock %}

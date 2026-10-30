@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ quiz.title }}</h1>
+{% if errors %}<div role="alert"><ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+{% if result %}
+<section aria-label="نتیجه آزمون">
+<p role="status">پاسخ‌های شما ثبت شد. امتیاز: {{ result.score }} از {{ result.total }}</p>
+{% for answer in result.answers %}
+<section><h2>{{ answer.prompt }}</h2>
+<p>پاسخ شما: {{ answer.choice_text }} — {% if answer.is_correct %}درست{% else %}نادرست{% endif %}</p>
+<p>پاسخ صحیح: {{ answer.correct_choice_text }}</p>
+{% if answer.explanation %}{{ answer.explanation|linebreaks }}{% endif %}
+</section>
+{% endfor %}
+</section>
+{% endif %}
+<form method="post">{% csrf_token %}
+{% for question in quiz.questions.all %}
+<fieldset><legend>{{ question.prompt }}</legend>
+{% for choice in question.choices.all %}
+<div><label><input type="radio" name="{{ question.pk }}" value="{{ choice.pk }}" required> {{ choice.text }}</label></div>
+{% endfor %}</fieldset>
+{% endfor %}
+{% if user.is_authenticated %}<button type="submit">ثبت پاسخ‌ها</button>{% endif %}
+</form>
+{% url 'progress:list' as progress_url %}
+{% url 'account_login' as login_url %}
+{% if user.is_authenticated and progress_url %}
+<a href="{{ progress_url }}">پیشرفت من</a>
+{% elif not user.is_authenticated and login_url %}
+<p><a href="{{ login_url }}?next={{ request.get_full_path|urlencode }}">برای شرکت در آزمون وارد شوید</a></p>
+{% endif %}
+{% endblock %}
