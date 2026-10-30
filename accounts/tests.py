@@ -3,6 +3,7 @@ from unittest.mock import patch
 import re
 
 from django.core import mail
+from django.db import IntegrityError, connection, transaction
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from allauth.account.models import EmailAddress
@@ -23,6 +24,35 @@ class UserManagerTests(SimpleTestCase):
             User.objects.create_user("", "secret")
         with self.assertRaises(ValueError):
             User.objects.create_superuser("admin@example.com", "secret", is_staff=False)
+
+
+class EmailConstraintTests(TestCase):
+    def test_conditional_uniqueness_on_insert_and_update(self):
+        first = User.objects.create_user("first@example.com")
+        second = User.objects.create_user("second@example.com")
+        third = User.objects.create_user("third@example.com")
+        EmailAddress.objects.create(user=first, email="shared@example.com", verified=True, primary=True)
+        pending = EmailAddress.objects.create(user=second, email="shared@example.com")
+        other = EmailAddress.objects.create(user=first, email="other@example.com")
+        EmailAddress.objects.create(user=second, email="another@example.com")
+
+        for address, field in ((pending, "verified"), (other, "primary")):
+            with self.subTest(field=field), self.assertRaises(IntegrityError), transaction.atomic():
+                EmailAddress.objects.filter(pk=address.pk).update(**{field: True})
+        for user, email, flags in (
+            (third, "shared@example.com", {"verified": True}),
+            (first, "third@example.com", {"primary": True}),
+        ):
+            with self.subTest(flags=flags), self.assertRaises(IntegrityError), transaction.atomic():
+                EmailAddress.objects.create(user=user, email=email, **flags)
+
+    def test_mysql_indexes_exist(self):
+        if connection.vendor != "mysql":
+            self.skipTest("MySQL-specific indexes")
+        with connection.cursor() as cursor:
+            constraints = connection.introspection.get_constraints(cursor, "account_emailaddress")
+        for name in ("accounts_unique_verified_email", "accounts_unique_primary_user"):
+            self.assertTrue(constraints[name]["unique"])
 
 
 class IdentityFlowTests(TestCase):
